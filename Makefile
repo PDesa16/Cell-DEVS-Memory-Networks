@@ -8,11 +8,15 @@ INCLUDE_DIRS = -I$(VENDOR_DIR)/cadmium_v2/include \
                -I$(VENDOR_DIR)/googletest/googletest/include \
                -I$(VENDOR_DIR)/googletest/googlemock/include \
                -I$(VENDOR_DIR)/json/include \
+			   -I$(VENDOR_DIR)/matplotplusplus/source \
+			   -I$(VENDOR_DIR)/matplotplusplus/build/source/matplot \
                -I$(VENDOR_DIR)/eigen
 
 LIB_DIRS = -L$(VENDOR_DIR)/googletest/lib 
 GTEST_LIBS = $(VENDOR_DIR)/googletest/lib/libgtest.a \
              $(VENDOR_DIR)/googletest/lib/libgtest_main.a
+
+MATPLOT_LIBS = $(VENDOR_DIR)/matplotplusplus/build/source/matplot/libmatplot.a $(VENDOR_DIR)/matplotplusplus/build/source/3rd_party/libnodesoup.a
 
 BIN_DIR = bin
 SRC_DIR = models
@@ -39,8 +43,11 @@ build_test_utils:
 build_test_model_builder:
 	$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) $(MAIN_DEPENDENCIES) $(SRC_DIR)/builder/test/modelBuilder_test.cpp $(LIB_DIRS) $(GTEST_LIBS) -o $(BIN_DIR)/test_model_builder
 
+build_test_modern_hopfield:
+	$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) $(MAIN_DEPENDENCIES) memory_models/modern/test_modernHopfield.cpp -fsanitize=address -fsanitize=undefined $(LIB_DIRS)  $(GTEST_LIBS) $(MATPLOT_LIBS) -o $(BIN_DIR)/test_modern_hopfield
+
 build_simulation:
-	$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) $(MAIN_DEPENDENCIES) main.cpp $(LIB_DIRS) -o $(BIN_DIR)/simulation
+	$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) $(MAIN_DEPENDENCIES) main.cpp -fsanitize=address -fsanitize=undefined $(LIB_DIRS) $(MATPLOT_LIBS) -o $(BIN_DIR)/simulation
 
 # Run all tests
 run_tests: $(addprefix run_, $(TESTS))
