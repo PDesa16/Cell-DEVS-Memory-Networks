@@ -18,7 +18,7 @@ cd Cell-DEVS-Memory-Networks
 
 ## Give Permissions to the Build Script
 ```bash
-chmod 755 build_script.sh
+chmod 755 build_dependencies.sh
 ```
 
 ## Building Dependencies
