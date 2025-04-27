@@ -13,7 +13,7 @@ git clone --recurse-submodules https://github.com/PDesa16/Cell-DEVS-Memory-Netwo
 
 ## Traverse to Project Directory
 ```bash
-cd Hebbian-Cell-DEVS
+cd Cell-DEVS-Memory-Networks
 ```
 
 ## Give Permissions to the Build Script
