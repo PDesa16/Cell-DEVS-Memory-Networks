@@ -1,5 +1,5 @@
 # Demo  
-![Demo GIF] 
+![Demo GIF](assets/stack_animation.gif)
 
 # Project Setup and Usage
 
