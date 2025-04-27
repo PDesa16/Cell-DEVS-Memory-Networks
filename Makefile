@@ -16,7 +16,6 @@ LIB_DIRS = -L$(VENDOR_DIR)/googletest/lib
 GTEST_LIBS = $(VENDOR_DIR)/googletest/lib/libgtest.a \
              $(VENDOR_DIR)/googletest/lib/libgtest_main.a
 
-MATPLOT_LIBS = $(VENDOR_DIR)/matplotplusplus/build/source/matplot/libmatplot.a $(VENDOR_DIR)/matplotplusplus/build/source/3rd_party/libnodesoup.a
 
 BIN_DIR = bin
 SRC_DIR = models
