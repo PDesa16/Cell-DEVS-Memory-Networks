@@ -11,7 +11,6 @@
 #include "../../utils/imageLoader.hpp"
 #include "../../utils/generalUtils.hpp"
 #include "../../types/imageStructures.hpp"
-#include "../../logger/EnergyLogger.hpp"
 #include "../cells/states/FieldState.hpp"
 #include "../cells/states/HebbState.hpp"
 #include "../cells/states/hopfieldState.hpp"
