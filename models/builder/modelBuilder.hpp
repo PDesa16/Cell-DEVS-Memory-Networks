@@ -15,7 +15,7 @@
 #include "../cells/states/HebbState.hpp"
 #include "../cells/states/hopfieldState.hpp"
 #include "../cells/states/modernHopfieldState.hpp"
-#include "../cells/factory/GridCellFactoryBase.hpp"
+#include "../cells/factory/gridCellFactoryBase.hpp"
 
 
 using namespace cadmium::celldevs;
