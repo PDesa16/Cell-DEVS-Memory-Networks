@@ -1,5 +1,7 @@
 # Demo  
-![Demo GIF](assets/stack_animation.gif)
+<p align="center">
+  <img src="assets/stack_animation.gif" alt="Demo GIF" width="500"/>
+</p>
 
 # Project Setup and Usage
 
