@@ -5,7 +5,6 @@
 #include "models/builder/modelBuilder.hpp"
 #include "utils/stochastic/random.hpp"
 #include "utils/generalUtils.hpp"
-#include <matplot/matplot.h>
 #include "utils/imageLoader.hpp"
 #include <cadmium/core/logger/csv.hpp>
 #include <cadmium/celldevs/grid/coupled.hpp>
