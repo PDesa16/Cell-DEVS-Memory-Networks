@@ -8,7 +8,7 @@
 ## Cloning the Repository
 To clone this repository along with its submodules:
 ```bash
-git clone --recurse-submodules https://github.com/PDesa16/Hebbian-Cell-DEVS](https://github.com/PDesa16/Cell-DEVS-Memory-Networks.git)
+git clone --recurse-submodules https://github.com/PDesa16/Hebbian-Cell-DEVS
 ```
 
 ## Traverse to Project Directory
