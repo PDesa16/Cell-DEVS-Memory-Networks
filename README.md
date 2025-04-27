@@ -1,67 +1,96 @@
-## Demo  
-![Demo GIF](https://github.com/PDesa16/RAFT-DEVS/blob/main/assets/demo.gif)
+# Demo  
+![Demo GIF] 
 
 # Project Setup and Usage
 
 ## Cloning the Repository
-To clone this repository along with its submodules, run:
-```sh
+To clone this repository along with its submodules:
+```bash
 git clone --recurse-submodules https://github.com/PDesa16/Hebbian-Cell-DEVS
 ```
 
 ## Traverse to Project Directory
-```sh
+```bash
 cd Hebbian-Cell-DEVS
 ```
+
 ## Give Permissions to the Build Script
-```sh
+```bash
 chmod 755 build_script.sh
 ```
 
-
 ## Building Dependencies
-Before building the project, install the necessary dependencies by running:
-```sh
+Before building the project, install the necessary dependencies:
+```bash
 ./build_dependencies.sh
 ```
 
 ## Building the Project
-To build all tests, use:
-```sh
+To build all tests:
+```bash
 make build_all
 ```
 
-You can also build individual components using:
-```sh
-make build_test_neuron_state
-make build_test_neuron_cell_grid
-make build_test_utils
+You can also build individual components:
+```bash
 make build_test_model_builder
 make build_simulation
 ```
 
-## Running Tests
-To run all tests:
-```sh
-make run_tests
-```
-
-To run specific tests:
-```sh
-make run_test_neuron_state
-make run_test_neuron_cell_grid
-make run_test_utils
-make run_test_model_builder
-```
-
 ## Running the Simulation
-To run the simulation test, execute:
-```sh
+To run the simulation:
+```bash
 make run_simulation
 ```
 
 ## Cleaning Up
-To clean up compiled binaries, run:
-```sh
+To clean up compiled binaries:
+```bash
 make clean
 ```
+
+# JSON File and Simulation Explanation
+
+The simulation configuration file is located at:
+
+```
+config/simulation_config.json
+```
+
+Example configuration:
+```json
+{
+  "simulation_type": "Hebb",
+  "scenario": {
+    "shape": [50, 50],
+    "origin": [0, 0],
+    "wrapped": false
+  },
+  "cells": {
+    "default": {
+      "delay": "inertial",
+      "model": "Hebbian-Learning",
+      "neighborhood": [
+        { "type": "von_neumann", "range": 1 }
+      ]
+    }
+  },
+  "simulation_details": {
+    "name": "Varying Neighborhood",
+    "image_selection": 0
+  }
+}
+```
+
+## Configuration Fields Overview
+| **Field** | **Meaning** |
+|:---|:---|
+| `simulation_type` | Selects which memory model to run (`Hebb`, `Hopfield`, `ModernHopfield`, `Field`). |
+| `scenario.shape` | Specifies the grid dimensions: `[width, height]`. |
+| `scenario.origin` | Starting coordinate of the grid (usually `[0, 0]`). |
+| `scenario.wrapped` | Whether the grid wraps around at edges (toroidal behavior if true). |
+| `cells.default.delay` | Type of delay model for each cell (`inertial` recommended). |
+| `cells.default.model` | Name of the cell model (e.g., `"Hebbian-Learning"`). |
+| `cells.default.neighborhood` | Defines the neighborhood type (`"von_neumann"`, `"moore"`) and range. |
+| `simulation_details.name` | Friendly name for the simulation (used for logs and graphs). |
+| `simulation_details.image_selection` | Which input image index to use as the ground truth. |
