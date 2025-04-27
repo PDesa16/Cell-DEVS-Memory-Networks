@@ -1,20 +1,21 @@
 {
-    "scenario": {
-      "shape": [50, 50],
-      "origin": [0, 0],
-      "wrapped": false
-    },
-    "cells": {
-      "default": {
-        "delay": "inertial",
-        "model": "Hebbian-Learning",
-        "neighborhood": [
-          { "type": "von_neumann", "range": 1 }
-        ]
-      }
-    },
-    "simulation_details": {
-      "name": "Varying Neighborhood",
-      "image_selection": 0
+  "simulation_type": "Hebb",
+  "scenario": {
+    "shape": [50, 50],
+    "origin": [0, 0],
+    "wrapped": false
+  },
+  "cells": {
+    "default": {
+      "delay": "inertial",
+      "model": "Hebbian-Learning",
+      "neighborhood": [
+        { "type": "von_neumann", "range": 1 }
+      ]
     }
+  },
+  "simulation_details": {
+    "name": "Varying Neighborhood",
+    "image_selection": 0
   }
+}

@@ -50,7 +50,7 @@ public:
         const std::unordered_map<std::vector<int>, NeighborData<StateT, double>>& neighborhood
     ) const final {
         if (state.time !=0) {
-            
+
             if (shouldTrain(state)) {
                 trainingNeuron(neighborhood, state);
             }
@@ -58,7 +58,7 @@ public:
             updateCellState(neighborhood, state);
 
             double energy = GetEnergy(neighborhood, state);
-            if (energy < state.energyThreshold) {
+            if (std::abs(energy) < state.energyThreshold) {
                 state.terminationStatus = true;
             }
 
@@ -71,7 +71,7 @@ public:
 
 protected:
     virtual bool shouldTrain(const StateT& state) const {
-        return false;  // Default don't train, could be global
+        return false;  
     }
 
     virtual void trainingNeuron(
@@ -88,7 +88,7 @@ protected:
         const std::unordered_map<std::vector<int>, NeighborData<StateT, double>>& neighborhood,
         const StateT& state
     ) const {
-        return 0.0; // Default to 0.0 unless overridden
+        return 0.0; 
     }
 };
 

@@ -36,6 +36,14 @@ std::shared_ptr<GridCell<StateT, double>> GlobalFactory(
 }
 
 
+enum class SimulationType {
+    Hebb,
+    Hopfield,
+    ModernHopfield,
+    Field
+};
+
+
 class ModelBuilder {
     public:
         JSON_LOADER scenarioLoader;
@@ -123,9 +131,117 @@ class ModelBuilder {
         return *this;
     }
 
+
+    template<typename StateT, typename CellType = GridCell<StateT, double>>
+    Eigen::MatrixXd extractTrainingParameters(int dimension) const {
+        Eigen::MatrixXd trainingParameters;
+    
+        std::visit([&](auto& model) {
+            auto components = model->getComponents();
+            int numCells = components.size();
+            trainingParameters.resize(numCells, dimension); 
+    
+            int idx = 0;
+            for (const auto& [id, component] : components) {
+                auto cellGrid = std::dynamic_pointer_cast<CellType>(component);
+                if (cellGrid) {
+                    auto param = cellGrid->getState().getTrainingParameters();
+                    if constexpr (std::is_same_v<decltype(param), double>) {
+                        trainingParameters(idx, 0) = param;
+                    } else {
+                        trainingParameters.row(idx) = param.transpose();
+                    }
+                    idx++;
+                }
+            }            
+        }, neuronCellModel);
+    
+        return trainingParameters;
+    }
+
+    template<typename StateT, typename CellType = GridCell<StateT, double>>
+    Eigen::VectorXd extractActivationStrengths() const {
+        Eigen::VectorXd activations;
+
+        std::visit([&](auto& model) {
+            auto components = model->getComponents();
+            int numCells = components.size();
+            activations.resize(numCells);
+
+            int idx = 0;
+            for (const auto& [id, component] : components) {
+                auto cellGrid = std::dynamic_pointer_cast<CellType>(component);
+                if (cellGrid) {
+                    activations(idx++) = cellGrid->getState().getActivationStrength();
+                }
+            }
+        }, neuronCellModel);
+
+        return activations;
+    }
+
+    SimulationType getSimulationType() const {
+        std::string simTypeStr = scenario.simulationType; 
+    
+        if (simTypeStr == "Hebb") {
+            return SimulationType::Hebb;
+        } else if (simTypeStr == "Hopfield") {
+            return SimulationType::Hopfield;
+        } else if (simTypeStr == "ModernHopfield") {
+            return SimulationType::ModernHopfield;
+        } else if (simTypeStr == "Field") {
+            return SimulationType::Field;
+        } else {
+            throw std::runtime_error("Unknown simulationType: " + simTypeStr);
+        }
+    }
+
+    int getImageWidth() const {
+        return scenario.shape[1]; 
+    }
+    
+    int getImageHeight() const {
+        return scenario.shape[0]; 
+    }
+
+    template<typename StateT, typename CellType>
+    void calculateRMSE(const Eigen::VectorXd& groundTruth, const std::string& simulationName) const {
+        Eigen::VectorXd predictions = extractActivationStrengths<StateT, CellType>();
+    
+        if (groundTruth.size() != predictions.size()) {
+            throw std::runtime_error("Ground truth and predictions size mismatch!");
+        }
+    
+        Eigen::VectorXd diff = groundTruth - predictions;
+        double mse = diff.squaredNorm() / diff.size();
+        double rmse = std::sqrt(mse);
+    
+        double max_gt = groundTruth.maxCoeff();
+        double min_gt = groundTruth.minCoeff();
+        double dynamicRange = max_gt - min_gt;
+    
+        double nrmse = rmse;
+        if (dynamicRange > 1e-8) { 
+            nrmse = rmse / dynamicRange;
+        }
+    
+        double meanPrediction = predictions.mean();
+        double variancePrediction = (predictions.array() - meanPrediction).square().sum() / predictions.size();
+        double mae = diff.array().abs().mean();
+    
+        // Save to log
+        std::ofstream logFile("logs/" + simulationName + "_rmse_log.csv", std::ios::app);
+        logFile << "RMSE," << rmse << "\n";
+        logFile << "nRMSE," << nrmse << "\n"; 
+        logFile << "MAE," << mae << "\n";
+        logFile << "MeanPrediction," << meanPrediction << "\n";
+        logFile << "VariancePrediction," << variancePrediction << "\n";
+        logFile.close();
+    }
+    
     void startSimulation() {
         rootCoordinator->start();
-        rootCoordinator->simulate(5.0);
+        rootCoordinator->simulate(25.0);
         rootCoordinator->stop();
     }
 };

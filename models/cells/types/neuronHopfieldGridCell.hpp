@@ -24,29 +24,24 @@ public:
         const std::unordered_map<std::vector<int>, NeighborData<HopfieldState, double>>& neighborhood,
         HopfieldState& state
     ) const override {
-        // No Training Logic - Using globalWeights directly
     }
 
     void updateCellState(
         const std::unordered_map<std::vector<int>, NeighborData<HopfieldState, double>>& neighborhood,
         HopfieldState& state
     ) const override {
-        auto [x, y] = GeneralUtils::stringToIndices(this->getId());
         double sum = 0.0;
-        int selfFlatIndex = x * state.imageWidth + y;
+        double beta = 0.1;
+        int selfFlatIndex = state.coords[0] * state.imageWidth + state.coords[1];
 
         for (const auto& [neighborId, neighborData] : neighborhood) {
-            int neighborState = neighborData.state->activationStatus;
-            int neighborFlatIndex = neighborId[0] * state.imageWidth + neighborId[1];
-
-            if (neighborId != std::vector<int>{x, y}) {
-                double weight = state.globalWeights(selfFlatIndex, neighborFlatIndex);
-                sum += weight * static_cast<double>(neighborState);
-            }
+            double neighborStrength = neighborData.state->activationStrength;
+            int neighborFlatIndex = neighborData.state->coords[0] * state.imageWidth + neighborData.state->coords[1];
+            double weight =  (*(state.weights))(selfFlatIndex, neighborFlatIndex);
+            sum += weight * static_cast<double>(neighborStrength);
         }
 
-        state.activationStatus = GeneralUtils::signum(sum);
-        state.neighboringStates->stateMatrix(x, y) = state.activationStatus;
+        state.activationStrength += beta * GeneralUtils::sigmoid(sum);
     }
 
     double GetEnergy(
@@ -54,15 +49,14 @@ public:
         const HopfieldState& state
     ) const override {
         double energy = 0.0;
-        auto [x, y] = GeneralUtils::stringToIndices(this->getId());
-        int selfFlatIndex = x * state.imageWidth + y;
-        int s_i = state.activationStatus;
+        int selfFlatIndex = state.coords[0] * state.imageWidth + state.coords[1];
+        double s_i = state.activationStrength;
 
         for (const auto& [neighborId, neighborData] : neighborhood) {
-            int neighborFlatIndex = neighborId[0] * state.imageWidth + neighborId[1];
-            int s_j = neighborData.state->activationStatus;
+            int neighborFlatIndex = neighborData.state->coords[0] * state.imageWidth + neighborData.state->coords[1];
+            double s_j = neighborData.state->activationStrength;
 
-            double w_ij = state.globalWeights(selfFlatIndex, neighborFlatIndex);
+            double w_ij = (*(state.weights))(selfFlatIndex, neighborFlatIndex);
             energy -= 0.5 * w_ij * s_j * s_i;
         }
 
@@ -71,6 +65,10 @@ public:
 
     double outputDelay(const HopfieldState& state) const override {
         return state.time;
+    }
+
+    HopfieldState& getState() {
+        return state;
     }
 };
 

@@ -22,7 +22,7 @@ BIN_DIR = bin
 SRC_DIR = models
 UTILS = utils
 
-MAIN_DEPENDENCIES = $(UTILS)/stochastic/random.cpp
+MAIN_DEPENDENCIES = 
 
 # Test targets
 TESTS = test_neuron_state test_neuron_cell_grid test_utils test_model_builder

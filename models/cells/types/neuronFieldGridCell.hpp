@@ -1,5 +1,5 @@
-#ifndef NEURON_HOPFIELD_GRID_CELL_HPP
-#define NEURON_HOPFIELD_GRID_CELL_HPP
+#ifndef NEURON_FIELD_GRID_CELL_HPP
+#define NEURON_FIELD_GRID_CELL_HPP
 
 #include <cmath>
 #include "../../../types/imageStructures.hpp"
@@ -28,8 +28,7 @@ public:
         double currentMag = state.state(3);
         Eigen::Vector3d netForce = Eigen::Vector3d::Zero();
 
-        for (size_t i = 0; i < state.storedPatterns.size(); ++i) {
-            for (const auto& [coord, neighbor] : neighborhood) {
+        for (const auto& [coord, neighbor] : neighborhood) {
                 Eigen::Vector3d neighborPos = neighbor.state->state.head<3>();
                 double neighborMag = neighbor.state->state(3);
                 Eigen::Vector3d delta = neighborPos - currentPos;
@@ -43,8 +42,8 @@ public:
                     Eigen::Vector3d force = -currentMag * neighborMag * invDistSq * unitDelta;
                     netForce += alignment * force;
                 }
-            }
         }
+    
         netForce /= static_cast<double>(state.storedPatterns.size());
 
         Eigen::Vector3d updatedPos = currentPos + 0.1 * netForce;
@@ -56,10 +55,8 @@ public:
         state.state.head<3>() = updatedPos;
 
         const double epsilon = 1e-4;
-        state.stabilityCounter = (movement < epsilon) ? state.stabilityCounter + 1 : 0;
-        const int stabilityThreshold = 5;
-        if (state.stabilityCounter >= stabilityThreshold) {
-            state.trainable = false;
+        if (movement < epsilon) {
+            state.time = std::numeric_limits<double>::infinity();
         }
     }
 
@@ -80,31 +77,13 @@ public:
                 double alignment = -1 * vi.dot(vj);
                 double mag_j = neighbor.state->state(3);
                 double magDiff = currentMag - mag_j;
-                double influence = std::tanh(magDiff * alignment);
+                double influence = std::tanh(2.0 * magDiff * alignment);
                 weightedSum += influence;
             }
         }
 
-        double beta = 10.0;
-        double total = 0.0;
-        std::vector<double> weights;
-
-        for (const auto& magnitude : state.storedPatterns) {
-            double sim = std::abs(currentMag - magnitude);
-            double score = std::exp(-beta * sim);
-            weights.push_back(score);
-            total += score;
-        }
-
-        double globalRecall = 0.0;
-        for (size_t i = 0; i < state.storedPatterns.size(); ++i) {
-            globalRecall += (weights[i] / total) * state.storedPatterns[i];
-        }
-
-        const double alpha = 0.1;
-        double combinedUpdate = currentMag + alpha * weightedSum;
-        state.previousActivation = state.state(3);
-        state.state(3) = std::clamp(0.5 * combinedUpdate + 0.5 * globalRecall, 0.0, 1.0);
+        double beta = 0.1;
+        state.state(3) = std::clamp(state.state(3) + beta * weightedSum , 0.0, 1.0);
     }
 
     double GetEnergy(
@@ -131,6 +110,10 @@ public:
 
     double outputDelay(const FieldState& state) const override {
         return state.time; 
+    }
+
+    FieldState& getState() {
+        return state;
     }
     
 };

@@ -10,8 +10,8 @@
 #include "../neuronStateInterface.hpp"
 
 struct FieldState : public IGenericState {
-    Eigen::Vector4d state = Eigen::Vector4d::Zero(); // (x, y, z, magnitude)
-    Eigen::VectorXd storedPatterns; // N x 1 vector of magnitudes
+    Eigen::Vector4d state = Eigen::Vector4d::Zero(); 
+    Eigen::VectorXd storedPatterns; 
     bool training = true;
     bool trainable = true;
     int stabilityCounter = 0;
@@ -24,6 +24,9 @@ struct FieldState : public IGenericState {
     std::vector<int> coords;
 
     double getActivationStrength() const { return state(3); }
+    Eigen::Vector4d getTrainingParameters() {
+        return state;
+    }
 };
 
 std::ostream& operator<<(std::ostream& os, const FieldState& s) {

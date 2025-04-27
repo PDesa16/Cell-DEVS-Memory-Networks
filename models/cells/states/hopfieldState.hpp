@@ -7,19 +7,34 @@
 #include "../neuronStateInterface.hpp"
 
 struct HopfieldState : public IGenericState {
-    int activationStatus = 0;
-    int previousActivation = 0;
+    double activationStrength = 0.0;
     double energyThreshold = 0.001;
     bool training = false;
     bool terminationStatus = false;
     int imageWidth = 0;
     int imageHeight = 0;
     std::vector<int> coords;
+    double time = 0.0;
 
-    std::shared_ptr<WeightMatrix> localWeights;
-    std::shared_ptr<StateMatrix> neighboringStates;
+    const Eigen::MatrixXd* weights = nullptr; 
 
-    int getActivationStatus() const { return activationStatus; }
+    double getActivationStrength() const { return activationStrength; }
 };
+
+std::ostream& operator<<(std::ostream& os, const HopfieldState& s) {
+    if (s.training) {
+        os << "Training...";
+    } else {
+        os << std::to_string(s.getActivationStrength());
+    }
+    return os;
+}
+
+inline bool operator!=(const HopfieldState& x, const HopfieldState& y) {
+    return (x.getActivationStrength() != y.getActivationStrength()) || (x.time != y.time);
+}
+
+[[maybe_unused]] void from_json(const nlohmann::json& j, HopfieldState& s) {
+}
 
 #endif // HOPFIELD_STATE_HPP

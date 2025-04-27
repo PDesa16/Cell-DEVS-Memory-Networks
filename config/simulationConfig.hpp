@@ -35,7 +35,9 @@ struct Scenario {
     bool wrapped;
     CellConfig defaultCell;
     SimulationDetails simulationDetails;
+    std::string simulationType;
 };
+
 
 class JSON_LOADER{
     public:
@@ -70,8 +72,10 @@ class JSON_LOADER{
                 scenario.defaultCell.neighborhood.push_back(n);
             }
         
+            scenario.simulationType = j["simulation_type"]; 
+        
             return scenario;
-        }
+        }        
 };
 
 #endif // SIMULATION_CONFIG_HPP

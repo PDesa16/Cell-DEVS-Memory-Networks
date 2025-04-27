@@ -12,8 +12,8 @@ using namespace cadmium::celldevs;
 
 class ModernHopfieldNeuronFactory : public GridCellFactoryBase<ModernHopfieldState> {
 private:
-    Eigen::MatrixXd storedPatternsSource;  // (numPatterns x imageSize)
-    Eigen::MatrixXd queryInput;             // (optional, blurred query image)
+    Eigen::MatrixXd storedPatternsSource;  
+    Eigen::MatrixXd queryInput;            
     bool useQueryInput;
 
 public:
@@ -42,9 +42,9 @@ public:
                 state.activationStrength = storedPatternsSource(flatIndex, 0); // (row = pixel index, col = pattern 0)
             }
         
-            // Store all pattern values for this pixel
-            state.storedPatterns = storedPatternsSource.row(flatIndex).transpose(); 
-            // row(flatIndex) = all patterns for this pixel
+
+            state.storedPatterns = storedPatternsSource.transpose();
+            
         
             state.coords = {cellId[0], cellId[1]};
             state.imageWidth = width;

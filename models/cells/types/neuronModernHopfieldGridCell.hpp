@@ -32,73 +32,46 @@ public:
         const std::unordered_map<std::vector<int>, NeighborData<ModernHopfieldState, double>>& neighborhood,
         ModernHopfieldState& state
     ) const override {
-        double beta = 1.0;
-    
-        if (state.globalContext) {
-            // --- Global Update ---
-            int featureDim = state.storedPatterns.cols();
-            int numPatterns = state.storedPatterns.rows();
-    
-            Eigen::VectorXd scores = beta * (state.storedPatterns.transpose() * state.activationStrength); // (features x 1)
-    
-            double max_score = scores.maxCoeff();
-            Eigen::VectorXd exp_scores = (scores.array() - max_score).exp();
-            double sum_exp = exp_scores.sum();
-            if (sum_exp == 0) sum_exp = 1e-8; // Prevent divide-by-zero
-            Eigen::VectorXd softmax_weights = exp_scores / sum_exp;
-    
-            Eigen::VectorXd updated_xi = softmax_weights;
-    
-            state.activationStrength = updated_xi.norm();
-        } else {
-            // --- Local Update ---
-            int featureDim = state.storedPatterns.cols();
-            int numPatterns = state.storedPatterns.rows();
-            int neighborCount = static_cast<int>(neighborhood.size());
-            int totalCount = neighborCount + 1;
-    
-            if (totalCount == 0) return;
-    
-            Eigen::MatrixXd subsetPatterns(totalCount, featureDim);
-            Eigen::VectorXd activationsNeighborhood(totalCount);
-    
-            int idx = 0;
-            for (const auto& [pos, neighbor] : neighborhood) {
-                activationsNeighborhood(idx) = neighbor.state->activationStrength;
-                int flatten_index = neighbor.state->coords[1] * state.imageWidth + neighbor.state->coords[0];
-    
-                if (flatten_index >= 0 && flatten_index < numPatterns) {
-                    subsetPatterns.row(idx) = state.storedPatterns.row(flatten_index);
-                } else {
-                    subsetPatterns.row(idx).setZero();
-                }
-    
-                idx++;
-            }
-    
-            activationsNeighborhood(idx) = state.activationStrength;
-            int self_flatten_index = state.coords[1] * state.imageWidth + state.coords[0];
-    
-            if (self_flatten_index >= 0 && self_flatten_index < numPatterns) {
-                subsetPatterns.row(idx) = state.storedPatterns.row(self_flatten_index);
-            } else {
-                subsetPatterns.row(idx).setZero();
-            }
-    
-            Eigen::VectorXd scores = beta * (subsetPatterns.transpose() * activationsNeighborhood); // (features x 1)
-    
-            double max_score = scores.maxCoeff();
-            Eigen::VectorXd exp_scores = (scores.array() - max_score).exp();
-            double sum_exp = exp_scores.sum();
-            if (sum_exp == 0) sum_exp = 1e-8;
-            Eigen::VectorXd softmax_weights = exp_scores / sum_exp;
-    
-            Eigen::VectorXd updated_xi = softmax_weights;
-    
-            state.activationStrength = updated_xi.norm();
-        }
-    }
 
+        double beta = 1.0;
+        int featureDim = state.storedPatterns.cols();
+        int numPatterns = state.storedPatterns.rows();
+        int neighborCount = static_cast<int>(neighborhood.size());
+        int totalCount = neighborCount + 1;
+
+        if (totalCount == 0) return;
+
+        Eigen::VectorXd activationsNeighborhood(totalCount);
+
+        int idx = 0;
+        for (const auto& [pos, neighbor] : neighborhood) {
+            activationsNeighborhood(idx++) = neighbor.state->activationStrength;
+        }
+
+        activationsNeighborhood(idx) = state.activationStrength;
+
+        double query = activationsNeighborhood.sum(); 
+
+        int flatten_index = state.coords[0] * state.imageWidth + state.coords[1]; // y * width + x
+
+        Eigen::VectorXd memory_vector(numPatterns);
+        for (int i = 0; i < numPatterns; ++i) {
+            memory_vector(i) = state.storedPatterns(i,flatten_index);
+        }
+
+        Eigen::VectorXd scores = beta * (memory_vector * query); // Each stored pattern pixel times query
+
+        double max_score = scores.maxCoeff();
+        Eigen::VectorXd exp_scores = (scores.array() - max_score).exp();
+        double sum_exp = exp_scores.sum();
+        if (sum_exp == 0) sum_exp = 1e-8;
+        Eigen::VectorXd softmax_weights = exp_scores / sum_exp; // (numPatterns x 1)
+
+        double updated_value = (memory_vector.transpose() * softmax_weights).value();
+
+        state.activationStrength = updated_value;
+
+    }
 
     double GetEnergy(
         const std::unordered_map<std::vector<int>, NeighborData<ModernHopfieldState, double>>& neighborhood,
@@ -130,6 +103,10 @@ public:
 
     double outputDelay(const ModernHopfieldState& state) const override {
         return state.time; 
+    }
+
+    ModernHopfieldState& getState() {
+        return state;
     }
 };
 
